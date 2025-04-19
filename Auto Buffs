@@ -1,0 +1,45 @@
+// 
+// 
+// L2 Romans Auto Buff Out of Town
+//
+// 
+
+var buffSchemeName: string = 'buffs'; // Example: 'FighterScheme' put your 1 hour buffs macro
+var buffSchemeName2: string = 'songndance'; // Here call your 20 min buffs macro
+
+function getBuffTime(ID: integer; Obj: TL2Live = nil): cardinal;  overload;   // check the time of the object buff by ID
+var i: integer;
+begin
+  result:= 0;
+  if (Obj = nil) then Obj:= User;                 // if the object i specified, then by default we use the user
+  for i:= 0 to Obj.Buffs.Count-1 do begin         // running through the list of our buffs
+    if (Obj.Buffs.Items(i).id = ID) then begin    // if id matched then
+      result:= Obj.Buffs.Items(i).EndTime;        // write to the result time before the end of the buff
+      break;
+    end;
+  end;
+end;
+
+begin
+    while (true = true) do begin
+        if (User.Dead) then begin
+          Break;
+        end;
+
+        if (getBuffTime(1204) < 9000) and not (User.Dead) then begin // Auto buff when < 10 sec remain on Wind Walk
+            print('Buffing the scheme ' + buffSchemeName);
+            Engine.BypassToServer('buffer givebuffs ' + buffSchemeName + ' pet');
+            delay(300);
+            Engine.BypassToServer('buffer givebuffs ' + buffSchemeName);
+        end;
+
+        if (getBuffTime(268) < 9000) and not (User.Dead) then begin // Auto buff when < 10 sec remain on Song of Wind
+            print('Buffing the scheme ' + buffSchemeName2);
+            Engine.BypassToServer('buffer givebuffs ' + buffSchemeName2 + ' pet');
+            delay(300);
+            Engine.BypassToServer('buffer givebuffs ' + buffSchemeName2);
+        end;
+
+        delay(1000);
+    end;
+end.
