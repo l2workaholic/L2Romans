@@ -1,0 +1,62 @@
+//
+// L2 Premium Auto Buffer + Death Notification
+//
+
+var
+  buffSchemeName: string = 'warrior'; // Example: 'FighterScheme'
+  buffSchemeName2: string = 'song';
+  deathNotified: Boolean = False; // To track if we've already notified about death
+
+function getBuffTime(ID: integer; Obj: TL2Live = nil): cardinal; overload;
+var 
+  i: integer;
+begin
+  result := 0;
+  if (Obj = nil) then Obj := User;
+  for i := 0 to Obj.Buffs.Count-1 do begin
+    if (Obj.Buffs.Items(i).id = ID) then begin
+      result := Obj.Buffs.Items(i).EndTime;
+      break;
+    end;
+  end;
+end;
+
+begin
+  while True do begin
+    // Death notification system
+    if User.Dead then begin
+      if not deathNotified then begin
+        // Send PM to Barba
+        Engine.EnterText('"Barba estou morto, ajuda!');
+        Delay(100);
+        Engine.UseKey('Enter');
+        WriteLn('[AVISO] Mensagem enviada para Barba (Personagem morto)');
+        deathNotified := True;
+      end;
+      
+      // Wait until revived
+      while User.Dead do
+        Delay(1000);
+    end
+    else begin
+      deathNotified := False; // Reset death notification when revived
+      
+      // Auto-buff system (only when alive)
+      if (getBuffTime(1062) < 9000) then begin // Berserker Spirit check
+        Print('Buffing the scheme ' + buffSchemeName);
+        Engine.BypassToServer('buffer givebuffs ' + buffSchemeName + ' pet');
+        Delay(300);
+        Engine.BypassToServer('buffer givebuffs ' + buffSchemeName);
+      end;
+
+      if (getBuffTime(268) < 9000) then begin // Song Hunter check
+        Print('Buffing the scheme ' + buffSchemeName2);
+        Engine.BypassToServer('buffer givebuffs ' + buffSchemeName2 + ' pet');
+        Delay(300);
+        Engine.BypassToServer('buffer givebuffs ' + buffSchemeName2);
+      end;
+    end;
+    
+    Delay(1000); // Main loop delay
+  end;
+end.
