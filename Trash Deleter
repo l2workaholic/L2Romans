@@ -1,0 +1,28 @@
+procedure DestroyItem;
+var
+  item: TL2Control;
+  itemIDs: array of Integer;
+  i, currentID: Integer;
+begin
+  // List of item IDs you want to destroy
+  itemIDs := [1833, 1832]; // just add item IDs here
+
+  for i := 0 to High(itemIDs) do
+  begin
+    currentID := itemIDs[i];
+
+    if Inventory.User.ByID(currentID, item) then
+    begin
+      Engine.DestroyItem(currentID, 111); // always destroys 111 units
+      Delay(500);  // half-second pause between each item
+    end;
+  end;
+end;
+
+begin
+  while True do
+  begin
+    DestroyItem;
+    Delay(2000);  // 2-second pause before repeating
+  end;
+end.
