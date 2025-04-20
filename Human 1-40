@@ -4,8 +4,19 @@ begin
   if User.InRange(-71338, 258271, -3104, 500, 150) then
   begin
     Engine.MoveTo(-71601, 258080, -3096);
-    Engine.MoveTo(-73483, 255957, -3128);
-    Engine.MoveTo(-76903, 251875, -3328);
-    Engine.MoveTo(-81354, 246591, -3680);
+    Engine.MoveTo(-71920, 257713, -3118);
+    Engine.MoveTo(-72708, 256787, -3118);
+    Engine.MoveTo(-73576, 255891, -3131);
+    Engine.MoveTo(-74628, 254657, -3284);
+    Engine.MoveTo(-75177, 254005, -3334);
+    Engine.MoveTo(-75657, 253325, -3334);
+    Engine.MoveTo(-76578, 252203, -3329);
+    Engine.MoveTo(-77132, 251554, -3330);
+    Engine.MoveTo(-77693, 250872, -3422);
+    Engine.MoveTo(-78497, 249921, -3576);
+    Engine.MoveTo(-79375, 248906, -3576);
+    Engine.MoveTo(-80345, 247754, -3644);
+    Engine.MoveTo(-81067, 246953, -3668);
+    
   end;
-end;
+end.
