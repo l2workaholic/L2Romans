@@ -1,0 +1,43 @@
+//
+// L2 Death Notification + Hourly Level PM (No Auto Buff)
+//
+
+var
+  deathNotified: Boolean = False;
+  lastLevelReportTime: Cardinal = 0;
+  levelStr: string;
+
+begin
+  lastLevelReportTime := GetTickCount;
+
+  while True do begin
+    // Death notification system
+    if User.Dead then begin
+      if not deathNotified then begin
+        Engine.EnterText('"Barba estou morto, ajuda!');
+        Delay(100);
+        Engine.UseKey('Enter');
+        WriteLn('[AVISO] Mensagem enviada para Barba (Personagem morto)');
+        deathNotified := True;
+      end;
+
+      while User.Dead do
+        Delay(1000);
+    end
+    else begin
+      deathNotified := False;
+
+      // Hourly level report
+      if (GetTickCount - lastLevelReportTime >= 3600000) then begin
+        Str(User.Level, levelStr);
+        Engine.EnterText('"Barba meu level atual é: ' + levelStr);
+        Delay(100);
+        Engine.UseKey('Enter');
+        WriteLn('[INFO] Level report sent to Barba');
+        lastLevelReportTime := GetTickCount;
+      end;
+    end;
+
+    Delay(1000);
+  end;
+end.
