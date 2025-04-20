@@ -1,0 +1,60 @@
+//
+// L2 Death Notification + Hourly Level & Adena PM (No Auto Buff)
+//
+
+var
+  deathNotified: Boolean = False;
+  lastLevelReportTime: Cardinal = 0;
+  levelStr, adenaStr: string;
+  i: integer;
+  adenaAmount: Int64;
+
+begin
+  lastLevelReportTime := GetTickCount;
+
+  while True do begin
+    // Death notification system
+    if User.Dead then begin
+      if not deathNotified then begin
+        Engine.EnterText('"Barba estou morto, ajuda!');
+        Delay(100);
+        Engine.UseKey('Enter');
+        WriteLn('[AVISO] Mensagem enviada para Barba (Personagem morto)');
+        deathNotified := True;
+      end;
+
+      while User.Dead do
+        Delay(1000);
+    end
+    else begin
+      deathNotified := False;
+
+      // Hourly level & adena report
+      if (GetTickCount - lastLevelReportTime >= 3600000) then begin
+        // Convert level to string
+        Str(User.Level, levelStr);
+
+        // Find adena (ID 57)
+        adenaAmount := 0;
+        for i := 0 to Inventory.User.Count - 1 do begin
+          if Inventory.User.Items(i).ID = 57 then begin
+            adenaAmount := Inventory.User.Items(i).Count;
+            break;
+          end;
+        end;
+
+        // Convert adena to string
+        Str(adenaAmount, adenaStr);
+
+        // Send PM to Barba
+        Engine.EnterText('"Barba meu level atual é: ' + levelStr + ' | Tenho isso de Adena: ' + adenaStr);
+        Delay(100);
+        Engine.UseKey('Enter');
+        WriteLn('[INFO] Level & Adena report sent to Barba');
+        lastLevelReportTime := GetTickCount;
+      end;
+    end;
+
+    Delay(1000);
+  end;
+end.
