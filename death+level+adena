@@ -1,8 +1,54 @@
 //
-// L2 Death Notification + Hourly Level & Adena PM (No Auto Buff)
+// Death Notification + Hourly Level & Adena PM + Auto Buff Out of Town
 //
 
+function FormatAdena(amount: Int64): string;
 var
+  kk, k: Int64;
+  s: string;
+begin
+  kk := 0;
+  k := 0;
+  s := '';
+
+  if amount >= 1000000 then begin
+    kk := amount div 1000000;
+    k := (amount mod 1000000) div 1000;
+
+    Str(kk, s);
+    Result := s + 'kk';
+
+    if k > 0 then begin
+      Str(k, s);
+      Result := Result + s + 'k';
+    end;
+  end
+  else if amount >= 1000 then begin
+    k := amount div 1000;
+    Str(k, s);
+    Result := s + 'k';
+  end
+  else begin
+    Str(amount, Result);
+  end;
+end;
+
+function getBuffTime(ID: integer; Obj: TL2Live = nil): cardinal;
+var i: integer;
+begin
+  result := 0;
+  if (Obj = nil) then Obj := User;
+  for i := 0 to Obj.Buffs.Count - 1 do begin
+    if (Obj.Buffs.Items(i).id = ID) then begin
+      result := Obj.Buffs.Items(i).EndTime;
+      break;
+    end;
+  end;
+end;
+
+var
+  buffSchemeName: string = 'warrior';
+  buffSchemeName2: string = 'song';
   deathNotified: Boolean = False;
   lastLevelReportTime: Cardinal = 0;
   levelStr, adenaStr: string;
@@ -13,7 +59,8 @@ begin
   lastLevelReportTime := GetTickCount;
 
   while True do begin
-    // Death notification system
+
+    // Death notification
     if User.Dead then begin
       if not deathNotified then begin
         Engine.EnterText('"Barba estou morto, ajuda!');
@@ -22,37 +69,46 @@ begin
         WriteLn('[AVISO] Mensagem enviada para Barba (Personagem morto)');
         deathNotified := True;
       end;
-
-      while User.Dead do
-        Delay(1000);
+      while User.Dead do Delay(1000);
+      continue; // Pula o restante do loop enquanto estiver morto
     end
-    else begin
+    else
       deathNotified := False;
 
-      // Hourly level & adena report
-      if (GetTickCount - lastLevelReportTime >= 3600000) then begin
-        // Convert level to string
-        Str(User.Level, levelStr);
+    // Buff automático fora de cidade
+    if (getBuffTime(1204) < 9000) then begin
+      WriteLn('[BUFF] Aplicando esquema: ' + buffSchemeName);
+      Engine.BypassToServer('buffer givebuffs ' + buffSchemeName + ' pet');
+      Delay(300);
+      Engine.BypassToServer('buffer givebuffs ' + buffSchemeName);
+    end;
 
-        // Find adena (ID 57)
-        adenaAmount := 0;
-        for i := 0 to Inventory.User.Count - 1 do begin
-          if Inventory.User.Items(i).ID = 57 then begin
-            adenaAmount := Inventory.User.Items(i).Count;
-            break;
-          end;
+    if (getBuffTime(268) < 9000) then begin
+      WriteLn('[BUFF] Aplicando esquema: ' + buffSchemeName2);
+      Engine.BypassToServer('buffer givebuffs ' + buffSchemeName2 + ' pet');
+      Delay(300);
+      Engine.BypassToServer('buffer givebuffs ' + buffSchemeName2);
+    end;
+
+    // Reporte de level + adena a cada 1h
+    if (GetTickCount - lastLevelReportTime >= 3600000) then begin
+      Str(User.Level, levelStr);
+
+      adenaAmount := 0;
+      for i := 0 to Inventory.User.Count - 1 do begin
+        if Inventory.User.Items(i).ID = 57 then begin
+          adenaAmount := Inventory.User.Items(i).Count;
+          break;
         end;
-
-        // Convert adena to string
-        Str(adenaAmount, adenaStr);
-
-        // Send PM to Barba
-        Engine.EnterText('"Barba meu level atual é: ' + levelStr + ' | Tenho isso de Adena: ' + adenaStr);
-        Delay(100);
-        Engine.UseKey('Enter');
-        WriteLn('[INFO] Level & Adena report sent to Barba');
-        lastLevelReportTime := GetTickCount;
       end;
+
+      adenaStr := FormatAdena(adenaAmount);
+
+      Engine.EnterText('"LEVEL: ' + levelStr + ' | Adena: ' + adenaStr);
+      Delay(100);
+      Engine.UseKey('Enter');
+      WriteLn('[INFO] Level & Adena report sent to Barba');
+      lastLevelReportTime := GetTickCount;
     end;
 
     Delay(1000);
