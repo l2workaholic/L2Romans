@@ -1,0 +1,11 @@
+//-----------------------Human born location--------------------------------
+
+begin
+  if User.InRange(-71338, 258271, -3104, 500, 150) then
+  begin
+    Engine.MoveTo(-71601, 258080, -3096);
+    Engine.MoveTo(-73483, 255957, -3128);
+    Engine.MoveTo(-76903, 251875, -3328);
+    Engine.MoveTo(-81354, 246591, -3680);
+  end;
+end;
